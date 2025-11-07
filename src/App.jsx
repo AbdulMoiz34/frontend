@@ -3,6 +3,8 @@ import AppRouter from "./config/AppRouter/AppRouter";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AuthContext from "./context/AuthContext";
+import axios from "axios";
+import { Spin } from "antd";
 
 const App = () => {
 
@@ -17,9 +19,10 @@ const App = () => {
     retry: false
   });
 
-  if (isLoading) return <p className="text-center mt-10">Checking Session...</p>;
+  if (isLoading) return <div className="flex justify-center items-center h-screen">
+    <Spin size="small" />
+  </div>
 
-  console.log(user);
   return (
     <AuthContext.Provider value={user}>
       <BrowserRouter>

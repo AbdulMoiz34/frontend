@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import ClinicLogo from "../Logo/Logo";
 import { FiMenu, FiX } from "react-icons/fi";
+import AuthContext from "../../context/AuthContext";
+import UserMenu from "./UserMenu";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
+
+    const user = useContext(AuthContext);
 
     const navLinks = [
         { name: 'HOME', to: '/' },
@@ -38,13 +42,13 @@ const Navbar = () => {
                             </NavLink>
                         ))}
                     </div>
-
-                    <div className="hidden md:flex items-center">
-                        <Link to="/signup" className="text-sm! cursor-pointer px-6 py-2 rounded-full text-white bg-indigo-500 hover:bg-indigo-600 hover:scale-105 transition duration-300! ease-in-out shadow-lg">
-                            Create account
-                        </Link>
-                    </div>
-
+                    {user ? <UserMenu /> :
+                        <div className="hidden md:flex items-center">
+                            <Link to="/signup" className="text-sm! cursor-pointer px-6 py-2 rounded-full text-white bg-indigo-500 hover:bg-indigo-600 hover:scale-105 transition duration-300! ease-in-out shadow-lg">
+                                Create account
+                            </Link>
+                        </div>
+                    }
                     <button
                         className="md:hidden text-gray-600"
                         onClick={() => setIsOpen(!isOpen)}
