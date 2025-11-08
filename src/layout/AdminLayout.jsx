@@ -1,7 +1,15 @@
-const Admin = () => {
-    return (
-        <div>Admin</div>
-    )
-}
+import {AdminSidebar} from "../admin/components";
+import { Outlet } from "react-router-dom";
 
-export default Admin;
+const AdminLayout = () => {
+    return (
+        <div className="flex">
+            <AdminSidebar />
+            <div className="flex-1 p-6 bg-gray-50 min-h-screen">
+                <Outlet />
+            </div>
+        </div>
+    );
+};
+
+export default AdminLayout;

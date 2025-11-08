@@ -1,15 +1,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout, AdminLayout } from "../../layout";
-import Home from "../../pages/Home";
-import { LoginPage, SignupPage, Contact, About, NotFound, Doctors, DoctorDetails, MyAppointments, PatientProfile } from "../../pages";
-import { ProtectedRoute } from "../../components";
-import DoctorAppointments from "../../doctor/pages/MyAppointment";
-import DoctorProfile from "../../doctor/pages/Profile";
-import AdminDashboard from "../../admin/pages/Dashboard";
-import AddDoctor from "../../admin/pages/AddDoctor";
+import { LoginPage, SignupPage, Contact, About, NotFound, Doctors, DoctorDetails, MyAppointments, PatientProfile, Home } from "../../pages";
+import { Dashboard as AdminDashboard, AddDoctor, Appointments, Doctors as AdminDoctors, Patients } from "../../admin/pages";
+import { DoctorDashboard, MyAppointment as DoctorAppointments, Profile as DoctorProfile } from "../../doctor/pages";
 import { useContext } from "react";
+import { ProtectedRoute } from "../../components";
 import AuthContext from "../../context/AuthContext";
-
 const AppRouter = () => {
     const user = useContext(AuthContext);
     console.log(user);
@@ -35,12 +31,16 @@ const AppRouter = () => {
             <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
                 <Route path="/doctor/appointments" element={<DoctorAppointments />} />
                 <Route path="/doctor/profile" element={<DoctorProfile />} />
+                <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
                 <Route element={<AdminLayout />}>
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/add-doctor" element={<AddDoctor />} />
+                    <Route path="/admin/appointments" element={<Appointments />} />
+                    <Route path="/admin/doctors" element={<AdminDoctors />} />
+                    <Route path="/admin/patients" element={<Patients />} />
                 </Route>
             </Route>
         </Routes >

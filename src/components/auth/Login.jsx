@@ -24,7 +24,7 @@ const Login = () => {
             if (res.data.user.role === "admin") {
                 navigate("/admin/dashboard");
             } else if (res.data.user.role === "doctor") {
-                navigate("/doctor/patients");
+                navigate("/doctor/dashboard");
             } else {
                 navigate("/");
             }

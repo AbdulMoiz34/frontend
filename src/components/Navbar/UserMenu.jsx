@@ -33,7 +33,7 @@ const UserMenu = () => {
         return () => document.removeEventListener("mousedown", handler);
     }, []);
 
-    if (!user) return null; // No menu if user not logged in
+    if (!user) return null;
 
     return (
         <div className="relative" ref={menuRef}>
