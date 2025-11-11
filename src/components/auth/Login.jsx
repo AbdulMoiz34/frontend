@@ -15,9 +15,7 @@ const Login = () => {
     const navigate = useNavigate();
     const onSubmit = async (data) => {
         try {
-            const res = await axios.post("http://localhost:3000/api/auth/login", data, {
-                withCredentials: true
-            });
+            const res = await axios.post("/auth/login", data);
 
             message.success("Login successful!");
 

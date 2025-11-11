@@ -94,13 +94,11 @@ const AddDoctor = () => {
 
             const imgUrl = await uploadFileOnCloudinary(imageFile);
             console.log(imgUrl);
-            await axios.post("http://localhost:3000/api/admin/add-doctor", {
+            await axios.post("/admin/add-doctor", {
                 imgUrl,
                 ...data,
                 availability,
                 status: "available"
-            }, {
-                withCredentials: true
             });
 
             message.success('Doctor added successfully!');

@@ -14,9 +14,7 @@ const Signup = () => {
 
     const onSubmit = async (data) => {
         try {
-            const res = await axios.post("http://localhost:3000/api/auth/register", data, {
-                withCredentials: true
-            });
+            const res = await axios.post("/auth/register", data);
             console.log(res);
             message.success("Account created successfully!");
             reset();
