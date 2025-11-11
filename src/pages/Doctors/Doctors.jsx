@@ -58,8 +58,8 @@ const Doctors = () => {
                 {/* Responsive Grid */}
                 <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredDoctors.length > 0 ? (
-                        filteredDoctors.map((doctor) => (
-                            <DoctorCard key={doctor.id} doctor={doctor} />
+                        filteredDoctors.map((doctor, idx) => (
+                            (< DoctorCard key={idx} doctor={doctor} />)
                         ))
                     ) : (
                         <p className="col-span-full text-center text-gray-500">
