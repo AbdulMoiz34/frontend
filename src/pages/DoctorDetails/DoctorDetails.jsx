@@ -72,9 +72,7 @@ const DoctorDetails = () => {
 
     const availability = doctor.availability || {};
     const isSelectedDateAvailable = selectedDate ? isDayAvailable(selectedDate, availability.days) : false;
-    const timeSlots = isSelectedDateAvailable && availability.startTime && availability.endTime
-        ? generateTimeSlots(availability.startTime, availability.endTime)
-        : [];
+    const timeSlots = isSelectedDateAvailable ? generateTimeSlots(availability.startTime, availability.endTime) : [];
 
     const handleBookAppointment = async () => {
         if (!user || user?.role !== "patient") return message.error("Please Login First");
@@ -108,7 +106,6 @@ const DoctorDetails = () => {
             setBookingLoading(false);
         }
     };
-
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-10">

@@ -1,94 +1,33 @@
 import { useState } from 'react';
-import { FaCalendarAlt, FaClock, FaUserMd, FaSearch, FaFilter, FaCheckCircle, FaHourglassHalf, FaTimesCircle, FaBan, FaEye, FaDownload } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaSearch, FaFilter, FaCheckCircle, FaHourglassHalf, FaTimesCircle, FaBan, FaEye, FaDownload } from 'react-icons/fa';
 import { MdMedicalServices, MdEventAvailable } from 'react-icons/md';
 import { Spin, message } from 'antd';
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { getAppointments } from '../../api/dashboardApi';
+import { format, startOfDay, isAfter, isEqual } from "date-fns";
 
 const PatientAppointments = () => {
-    const [isLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('all');
-    const [selectedFilter, setSelectedFilter] = useState('all'); // all, upcoming, past
+    const [selectedFilter, setSelectedFilter] = useState('all');
 
-    // Mock appointments data - Replace with your API call
-    const appointments = [
-        {
-            "_id": "6911980df653d78b71b29d73",
-            "patient": {
-                "_id": "690d9c065381536f7a35e649",
-                "fullName": "ahmed",
-                "email": "ahmed@gmail.com"
-            },
-            "doctor": {
-                "_id": "690f526484c3d330548ea426",
-                "specialization": "Neurologist",
-                "fullName": "Dr. Sara",
-                "image": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400"
-            },
-            "status": "Checked-In",
-            "date": "2025-11-15T00:00:00.000Z",
-            "time": "19:30",
-            "patientDisease": "Severe headache and dizziness",
-            "__v": 0
-        },
-        {
-            "_id": "6911980df653d78b71b29d74",
-            "patient": {
-                "_id": "690d9c065381536f7a35e649",
-                "fullName": "ahmed",
-                "email": "ahmed@gmail.com"
-            },
-            "doctor": {
-                "_id": "690f526484c3d330548ea427",
-                "specialization": "Cardiologist",
-                "fullName": "Dr. Michael Chen",
-                "image": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400"
-            },
-            "status": "Booked",
-            "date": "2025-11-20T00:00:00.000Z",
-            "time": "10:00",
-            "patientDisease": "Regular heart checkup",
-            "__v": 0
-        },
-        {
-            "_id": "6911980df653d78b71b29d75",
-            "patient": {
-                "_id": "690d9c065381536f7a35e649",
-                "fullName": "ahmed",
-                "email": "ahmed@gmail.com"
-            },
-            "doctor": {
-                "_id": "690f526484c3d330548ea428",
-                "specialization": "Dermatologist",
-                "fullName": "Dr. Emily Rodriguez",
-                "image": "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400"
-            },
-            "status": "Completed",
-            "date": "2025-11-05T00:00:00.000Z",
-            "time": "14:00",
-            "patientDisease": "Skin rash treatment",
-            "__v": 0
-        },
-        {
-            "_id": "6911980df653d78b71b29d76",
-            "patient": {
-                "_id": "690d9c065381536f7a35e649",
-                "fullName": "ahmed",
-                "email": "ahmed@gmail.com"
-            },
-            "doctor": {
-                "_id": "690f526484c3d330548ea429",
-                "specialization": "Orthopedic",
-                "fullName": "Dr. James Wilson",
-                "image": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400"
-            },
-            "status": "Cancelled",
-            "date": "2025-11-12T00:00:00.000Z",
-            "time": "16:30",
-            "patientDisease": "Knee pain consultation",
-            "__v": 0
-        }
-    ];
+    const user = useSelector(state => state.auth.user);
+    console.log(user.id);
 
+    const { data: appointments, isLoading, error } = useQuery({
+        queryKey: ["myAppointments"],
+        queryFn: getAppointments
+    })
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <Spin size="large" />
+            </div>
+        );
+    }
+
+    console.log(appointments);
     const statusConfig = {
         'Booked': {
             color: 'bg-blue-100 text-blue-700 border-blue-300',
@@ -117,33 +56,25 @@ const PatientAppointments = () => {
     };
 
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+        return format(new Date(dateString), "EEE, MMM d, yyyy");
     };
 
     const isUpcoming = (dateString) => {
-        const appointmentDate = new Date(dateString);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return appointmentDate >= today;
+        const appointmentDate = startOfDay(new Date(dateString));
+        const today = startOfDay(new Date());
+
+        return isAfter(appointmentDate, today) || isEqual(appointmentDate, today);
     };
 
     // Filter appointments
     const filteredAppointments = appointments.filter(apt => {
-        const matchesSearch =
-            apt.doctor.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        const matchesSearch = apt.doctor.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             apt.doctor.specialization.toLowerCase().includes(searchQuery.toLowerCase()) ||
             apt.patientDisease?.toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesStatus = selectedStatus === 'all' || apt.status === selectedStatus;
 
-        const matchesFilter =
-            selectedFilter === 'all' ||
+        const matchesFilter = selectedFilter === 'all' ||
             (selectedFilter === 'upcoming' && isUpcoming(apt.date)) ||
             (selectedFilter === 'past' && !isUpcoming(apt.date));
 
@@ -163,16 +94,8 @@ const PatientAppointments = () => {
         console.log('Cancelling appointment:', appointmentId);
     };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Spin size="large" />
-            </div>
-        );
-    }
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 py-12 px-4">
+        <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-purple-50 py-12 px-4">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
@@ -182,7 +105,7 @@ const PatientAppointments = () => {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
+                    <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
                         <div className="flex items-center justify-between mb-2">
                             <div className="bg-white/20 p-3 rounded-xl">
                                 <FaCalendarAlt className="text-2xl" />
@@ -192,7 +115,7 @@ const PatientAppointments = () => {
                         <p className="text-blue-100 text-sm">Total Appointments</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
+                    <div className="bg-linear-to-br from-green-500 to-green-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
                         <div className="flex items-center justify-between mb-2">
                             <div className="bg-white/20 p-3 rounded-xl">
                                 <MdEventAvailable className="text-2xl" />
@@ -202,7 +125,7 @@ const PatientAppointments = () => {
                         <p className="text-green-100 text-sm">Upcoming</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
+                    <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
                         <div className="flex items-center justify-between mb-2">
                             <div className="bg-white/20 p-3 rounded-xl">
                                 <FaCheckCircle className="text-2xl" />
@@ -212,7 +135,7 @@ const PatientAppointments = () => {
                         <p className="text-purple-100 text-sm">Completed</p>
                     </div>
 
-                    <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
+                    <div className="bg-linear-to-br from-red-500 to-red-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
                         <div className="flex items-center justify-between mb-2">
                             <div className="bg-white/20 p-3 rounded-xl">
                                 <FaTimesCircle className="text-2xl" />
@@ -297,9 +220,9 @@ const PatientAppointments = () => {
                                 >
                                     <div className="flex flex-col lg:flex-row gap-6">
                                         {/* Doctor Image */}
-                                        <div className="flex-shrink-0">
+                                        <div className="shrink-0">
                                             <img
-                                                src={appointment.doctor.image || 'https://via.placeholder.com/150'}
+                                                src={appointment.doctor.imgUrl || 'https://via.placeholder.com/150'}
                                                 alt={appointment.doctor.fullName}
                                                 className="w-24 h-24 rounded-2xl object-cover border-4 border-slate-100"
                                             />
@@ -366,10 +289,6 @@ const PatientAppointments = () => {
 
                                                 {upcoming && appointment.status !== 'Cancelled' && (
                                                     <>
-                                                        <button className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-all font-medium text-sm">
-                                                            <FaDownload />
-                                                            Download
-                                                        </button>
                                                         <button
                                                             onClick={() => handleCancelAppointment(appointment._id)}
                                                             className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-all font-medium text-sm"
@@ -398,9 +317,6 @@ const PatientAppointments = () => {
                         <FaCalendarAlt className="text-6xl text-slate-300 mx-auto mb-4" />
                         <h3 className="text-xl font-semibold text-slate-700 mb-2">No appointments found</h3>
                         <p className="text-slate-500 mb-6">Try adjusting your filters or book a new appointment</p>
-                        <button className="px-6 py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-all">
-                            Book New Appointment
-                        </button>
                     </div>
                 )}
             </div>
