@@ -1,17 +1,17 @@
-const uploadFileOnCloudinary = async (file) => {
-    const formData = new FormData();
-    formData.append("upload_preset", 141424243);
-    formData.append("file", file);
+const uploadFileOnCloudinary = async (base64Image) => {
+    const data = new FormData();
+    data.append("file", base64Image);
+    data.append("upload_preset", "141424243");
+    data.append("cloud_name", "moiz34");
 
     try {
-
         const res = await fetch("https://api.cloudinary.com/v1_1/moiz34/image/upload", {
-            body: formData,
+            body: data,
             method: "POST"
         });
-        const data = await res.json();
+        const data1 =  await res.json();
 
-        return data.secure_url;
+        return data1.secure_url;
     } catch (err) {
         console.log(err)
         throw err;

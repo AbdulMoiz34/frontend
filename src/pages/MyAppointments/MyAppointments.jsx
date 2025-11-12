@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { getAppointments } from '../../api/dashboardApi';
 import { format, startOfDay, isAfter, isEqual } from "date-fns";
+import axios from 'axios';
 
 const PatientAppointments = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -27,7 +28,6 @@ const PatientAppointments = () => {
         );
     }
 
-    console.log(appointments);
     const statusConfig = {
         'Booked': {
             color: 'bg-blue-100 text-blue-700 border-blue-300',
@@ -89,9 +89,14 @@ const PatientAppointments = () => {
         cancelled: appointments.filter(a => a.status === 'Cancelled').length
     };
 
-    const handleCancelAppointment = (appointmentId) => {
-        message.success('Appointment cancelled successfully');
-        console.log('Cancelling appointment:', appointmentId);
+    const handleCancelAppointment = async (appointmentId) => {
+        try {
+            const res = await axios.patch(`/appointments/${appointmentId}/status`, { status: "Cancelled" });
+            message.success('Appointment cancelled successfully');
+            console.log('Cancelling appointment:', appointmentId);
+        } catch (err) {
+            message.error(err.message);
+        }
     };
 
     return (
@@ -282,10 +287,6 @@ const PatientAppointments = () => {
 
                                             {/* Action Buttons */}
                                             <div className="flex gap-3">
-                                                <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all font-medium text-sm">
-                                                    <FaEye />
-                                                    View Details
-                                                </button>
 
                                                 {upcoming && appointment.status !== 'Cancelled' && (
                                                     <>
